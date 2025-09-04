@@ -35,43 +35,15 @@ class AllAirportParkingPrices extends Controller
 
     public function download_excel(Request $request)
     {
-        // $data = ParkingWebsitesComparePrices::whereDate('from_date', '>=', $request->from_date)
-        //     ->whereDate('from_date', '<=', $request->to_date)
-        //     ->when($request->website_id, function ($query) use ($request) {
-        //         return $query->where('website_id', $request->website_id);
-        //     })
-        //     ->orderBy('updated_at', 'desc')
-        //     ->orderBy('from_date', 'asc')
-        //     ->get();
-        // return var_dump($data);
-
-        // $data = DB::select("SELECT p.*
-        //             FROM parking_websites_compare_prices p
-        //             JOIN (
-        //                 SELECT parking_company_name, from_date, MAX(updated_at) AS latest_updated_at
-        //                 FROM parking_websites_compare_prices
-        //                 WHERE DATE(from_date) >= :from_date
-        //                 AND DATE(from_date) <= :to_date
-        //                 AND website_id = :website_id
-        //                 GROUP BY parking_company_name, from_date
-        //             ) latest
-        //             ON p.parking_company_name = latest.parking_company_name
-        //             AND p.from_date = latest.from_date
-        //             AND p.updated_at = latest.latest_updated_at
-        //             ORDER BY  p.from_date ASC", [
-        //                 'from_date' => $request->from_date,
-        //                 'to_date' => $request->to_date,
-        //                 'website_id' => 2
-        //             ]);
-        //             return var_dump($data);
-
         $bindings = [$request->from_date, $request->to_date];
+        $gap_days = $request->gap_days ?? 0;
 
         $websiteCondition = '';
         if (! empty($request->website_id)) {
             $websiteCondition = ' AND website_id = ?';
             $bindings[]       = $request->website_id;
         }
+        // $bindings[] = $request->gap_days; // Add date_diff to bindings
 
         # We only getting the latest prices that are updated today
         $sql = "
@@ -83,6 +55,7 @@ class AllAirportParkingPrices extends Controller
                 WHERE DATE(from_date) >= ?
                 AND DATE(from_date) <= ?
                 $websiteCondition
+                AND DATEDIFF(to_date, from_date) = $gap_days
                 GROUP BY parking_company_name, from_date
             ) latest
             ON p.parking_company_name = latest.parking_company_name
@@ -92,6 +65,7 @@ class AllAirportParkingPrices extends Controller
             ORDER BY p.from_date ASC
         ";
 
+        // dd($sql, $bindings);
         $data = DB::select($sql, $bindings);
 
         $distinctCompaniesNames = collect($data)
@@ -107,11 +81,6 @@ class AllAirportParkingPrices extends Controller
 
         // Now get the websites
         $websites = ParkingWebsite::whereIn('id', $websiteIds)->get();
-
-        // Display as an HTML table
-        // echo '<table border="1" cellpadding="8" cellspacing="0" style="margin-top:20px; width:100%;">';
-        // echo '<thead><tr><th>Company Name</th><th>From Date</th><th>Created At</th></tr></thead>';
-        // echo '<t>';
 
         $structuredData = collect($data)
             ->groupBy('website_id') // First level: Group by website
