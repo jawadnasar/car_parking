@@ -18,10 +18,18 @@ class ParkingWebsitesSeeder extends Seeder
                 'trust_score' => 4.5
             ],
             [
+                'id' => 2,
                 'name' => 'Compare Parking Deals',
                 'base_url' => 'https://compareparkingdeals.co.uk/',
                 'logo_url' => 'https://compareparkingdeals.co.uk/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo.df102680.png&w=384&q=75',
                 'trust_score' => 4.2
+            ], 
+            [
+                'id' => 3,
+                'name' => 'Simply Park and Fly',
+                'base_url' => 'https://www.simplyparkandfly.co.uk/',
+                'logo_url' => 'https://www.simplyparkandfly.co.uk/assets/front/images/logo.png',
+                'trust_score' => 3.1
             ]
         ];
 
