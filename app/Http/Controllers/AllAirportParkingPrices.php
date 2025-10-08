@@ -106,6 +106,7 @@ class AllAirportParkingPrices extends Controller
             ];
         });
         $jsonData = json_decode($finalData, true);
+        // echo '<pre>'; print_r($jsonData); echo '</pre>'; exit;
         return Excel::download(new AirportParkingExport($jsonData), 'exports_prices.xlsx');
 
         // return Excel::download(new AirportParkingExport($distinctCompaniesNames, $parkingPrices), 'exports_prices.xlsx');

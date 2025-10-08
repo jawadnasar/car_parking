@@ -45,7 +45,7 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
 
     protected function mapCompanyColumns()
     {
-        $column = 'B'; // Start from column B (Date is column A)
+        $column = 'B'; // Start from column B (Date is column A, Updated At will be last column)
 
         foreach ($this->data as $websiteName => $companies) {
             foreach ($companies as $companyName => $prices) {
@@ -73,14 +73,24 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
         // Create data rows
         foreach ($dates as $date) {
             $row = [$date];
+            $latestUpdate = null;
 
             foreach ($this->data as $websiteName => $companies) {
                 foreach ($companies as $companyName => $prices) {
                     $priceInfo = collect($prices)->firstWhere('date', $date);
-                    $row[]     = $priceInfo ? $priceInfo['price'] : '';
+                    $row[] = $priceInfo ? $priceInfo['price'] : '';
+                    
+                    // Track the latest updated_at for this date
+                    if ($priceInfo && $priceInfo['updated_at']) {
+                        if (!$latestUpdate || $priceInfo['updated_at'] > $latestUpdate) {
+                            $latestUpdate = $priceInfo['updated_at'];
+                        }
+                    }
                 }
             }
 
+            // Add the latest updated_at for this date row
+            $row[] = $latestUpdate ?: 'N/A';
             $rows[] = $row;
         }
 
@@ -97,11 +107,17 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
             }
         }
 
+        // Add Updated At as the last column
+        $headers[] = 'Last Updated';
         return $headers;
     }
 
     public function styles(Worksheet $sheet)
     {
+        $lastColumn = $sheet->getHighestColumn();
+        $lastRow = $sheet->getHighestRow();
+        $updatedAtColumn = $lastColumn; // Last column is Updated At
+
         // Apply styles to all company columns
         foreach ($this->companyColumns as $column => $websiteName) {
             $colors = $this->colorMap[$websiteName];
@@ -125,7 +141,6 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
             ]);
 
             // Style data cells
-            $lastRow = $sheet->getHighestRow();
             $sheet->getStyle($column . '2:' . $column . $lastRow)->applyFromArray([
                 'fill'    => [
                     'fillType'   => Fill::FILL_SOLID,
@@ -141,7 +156,6 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
         }
 
         // Style Date column
-        $lastRow = $sheet->getHighestRow();
         $sheet->getStyle('A1:A' . $lastRow)->applyFromArray([
             'fill'    => [
                 'fillType'   => Fill::FILL_SOLID,
@@ -158,8 +172,25 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
             ],
         ]);
 
+        // Style Updated At column
+        $sheet->getStyle($updatedAtColumn . '1:' . $updatedAtColumn . $lastRow)->applyFromArray([
+            'fill'    => [
+                'fillType'   => Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFE8E8E8'],
+            ],
+            'font'    => [
+                'bold' => true,
+                'color' => ['argb' => 'FF666666'],
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color'       => ['argb' => 'FF000000'],
+                ],
+            ],
+        ]);
+
         // Apply borders to the entire data range
-        $lastColumn = $sheet->getHighestColumn();
         $sheet->getStyle('A1:' . $lastColumn . $lastRow)->applyFromArray([
             'borders' => [
                 'outline' => [
@@ -174,9 +205,11 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
         ]);
 
         // Set column widths
-        $sheet->getColumnDimension('A')->setWidth(15);
+        $sheet->getColumnDimension('A')->setWidth(15); // Date
+        $sheet->getColumnDimension($updatedAtColumn)->setWidth(20); // Updated At
+        
         foreach ($this->companyColumns as $column => $websiteName) {
-            $sheet->getColumnDimension($column)->setWidth(20);
+            $sheet->getColumnDimension($column)->setWidth(15); // Company columns
         }
 
         // Freeze header row
@@ -198,6 +231,4 @@ class AirportParkingExport implements FromCollection, WithHeadings, WithStyles
         // Convert back to hex
         return sprintf("%02X%02X%02X", $r, $g, $b);
     }
-
-    //Just check
 }
