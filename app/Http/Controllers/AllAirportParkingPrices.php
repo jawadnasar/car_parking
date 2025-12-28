@@ -47,7 +47,8 @@ class AllAirportParkingPrices extends Controller
 
         # We only getting the latest prices that are updated today
         $sql = "
-            SELECT p.*
+            SELECT concat(p.parking_company_name, IFNULL(p.parking_subtype,'')) AS parking_company_name_subtype, 
+                    p.*
             FROM parking_websites_compare_prices p
             JOIN (
                 SELECT parking_company_name, from_date, MAX(updated_at) AS latest_updated_at
@@ -62,16 +63,17 @@ class AllAirportParkingPrices extends Controller
             AND p.from_date = latest.from_date
             AND p.updated_at = latest.latest_updated_at
             #AND DATE(p.price_updated_at) = DATE(NOW())
-            ORDER BY p.from_date ASC
+            ORDER BY p.from_date ASC, CONCAT(p.parking_company_name, p.parking_subtype) ASC
         ";
 
         // dd($sql, $bindings);
         $data = DB::select($sql, $bindings);
 
         $distinctCompaniesNames = collect($data)
-            ->pluck('parking_company_name') // get just the column values
+            ->pluck('parking_company_name_subtype') // get just the column values
             ->unique()                      // remove duplicates
             ->values();                     // reset array keys
+            // dd($distinctCompaniesNames);
 
         // Convert to collection and get website_ids
         $websiteIds = collect($data)
@@ -86,7 +88,7 @@ class AllAirportParkingPrices extends Controller
             ->groupBy('website_id') // First level: Group by website
             ->map(function ($websiteGroup) {
                 return $websiteGroup
-                    ->groupBy('parking_company_name') // Second level: Group by company
+                    ->groupBy('parking_company_name_subtype') // Second level: Group by company
                     ->map(function ($companyGroup) {
                         return $companyGroup->map(function ($item) {
                             return [

@@ -48,6 +48,7 @@ class CompareAllWebsitesPricesController extends Controller
                     'price'         => 'required|numeric',
                     'airport_code'  => 'required|string',
                     'parking_type'  => 'required|string|max:50',
+                    'parking_subtype' => 'nullable|string|max:50',
                     'from_date'     => 'required|date',
                     'to_date'       => 'nullable|date|after_or_equal:from_date',
                     'from_time'     => 'nullable|date_format:H:i',
@@ -70,6 +71,7 @@ class CompareAllWebsitesPricesController extends Controller
                 $cp->is_available         = $item['is_available'] ?? true; // Default to true
                 $cp->price_updated_at     = now();                         // Set current time as default
                 $cp->parking_type         = $item['parking_type'];                        // Default parking type if not provided
+                $cp->parking_subtype      = $item['parking_subtype'] ?? null;             // Default parking subtype if not provided
 
                 $cp->save();
                 if (! $cp->wasRecentlyCreated) {
