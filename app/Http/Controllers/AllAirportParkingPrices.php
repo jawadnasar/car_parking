@@ -47,7 +47,7 @@ class AllAirportParkingPrices extends Controller
 
         # We only getting the latest prices that are updated today
         $sql = "
-            SELECT concat(p.parking_company_name, IFNULL(p.parking_subtype,'')) AS parking_company_name_subtype, 
+            SELECT CONCAT_WS(' ',p.parking_company_name, IFNULL(p.parking_subtype,'')) AS parking_company_name_subtype, 
                     p.*
             FROM parking_websites_compare_prices p
             JOIN (
