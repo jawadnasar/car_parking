@@ -1,0 +1,118 @@
+<?php
+namespace App\Http\Controllers;
+
+use App\Exports\AirportParkingExport;
+use App\Models\ParkingWebsite;
+use App\Models\ParkingWebsitesComparePrices;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+
+class AllAirportParkingPrices extends Controller
+{
+    public function index()
+    {
+        $parkingWebsites = ParkingWebsite::all();
+        return view('all_airport_parking_prices', compact('parkingWebsites'));
+    }
+
+    public function search_by_dates(Request $request)
+    {
+        $parkingWebsites = ParkingWebsite::all();
+
+        $parkingPrices = ParkingWebsitesComparePrices::whereDate('from_date', '>=', $request->from_date)
+            ->whereDate('from_date', '<=', $request->to_date)
+            ->when($request->website_id, function ($query) use ($request) { // When website_id is provided, filter by it
+                return $query->where('website_id', $request->website_id);
+            })
+            ->orderBy('from_date', 'asc')
+            ->orderBy('to_date', 'asc')
+            ->orderBy('parking_company_name', 'asc')
+            ->get();
+                                                                                                // return $parkingPrices->tosql();
+        return view('all_airport_parking_prices', compact('parkingPrices', 'parkingWebsites')); // Pass the date or
+    }
+
+    public function download_excel(Request $request)
+    {
+        $bindings = [$request->from_date, $request->to_date];
+        $gap_days = $request->gap_days ?? 0;
+
+        $websiteCondition = '';
+        if (! empty($request->website_id)) {
+            $websiteCondition = ' AND website_id = ?';
+            $bindings[]       = $request->website_id;
+        }
+        // $bindings[] = $request->gap_days; // Add date_diff to bindings
+
+        # We only getting the latest prices that are updated today
+        $sql = "
+            SELECT CONCAT_WS(' ',p.parking_company_name, IFNULL(p.parking_subtype,'')) AS parking_company_name_subtype, 
+                    p.*
+            FROM parking_websites_compare_prices p
+            JOIN (
+                SELECT parking_company_name, from_date, MAX(updated_at) AS latest_updated_at
+                FROM parking_websites_compare_prices
+                WHERE DATE(from_date) >= ?
+                AND DATE(from_date) <= ?
+                $websiteCondition
+                AND DATEDIFF(to_date, from_date) = $gap_days
+                GROUP BY parking_company_name, from_date
+            ) latest
+            ON p.parking_company_name = latest.parking_company_name
+            AND p.from_date = latest.from_date
+            AND p.updated_at = latest.latest_updated_at
+            #AND DATE(p.price_updated_at) = DATE(NOW())
+            ORDER BY p.from_date ASC, CONCAT(p.parking_company_name, p.parking_subtype) ASC
+        ";
+
+        // dd($sql, $bindings);
+        $data = DB::select($sql, $bindings);
+
+        $distinctCompaniesNames = collect($data)
+            ->pluck('parking_company_name_subtype') // get just the column values
+            ->unique()                      // remove duplicates
+            ->values();                     // reset array keys
+            // dd($distinctCompaniesNames);
+
+        // Convert to collection and get website_ids
+        $websiteIds = collect($data)
+            ->pluck('website_id')
+            ->unique()
+            ->values();
+
+        // Now get the websites
+        $websites = ParkingWebsite::whereIn('id', $websiteIds)->get();
+
+        $structuredData = collect($data)
+            ->groupBy('website_id') // First level: Group by website
+            ->map(function ($websiteGroup) {
+                return $websiteGroup
+                    ->groupBy('parking_company_name_subtype') // Second level: Group by company
+                    ->map(function ($companyGroup) {
+                        return $companyGroup->map(function ($item) {
+                            return [
+                                'date'       => $item->from_date,
+                                'price'      => $item->price, // assuming there's a price field
+                                'updated_at' => $item->updated_at,
+                            ];
+                        })->values(); // Reset array keys
+                    });
+            });
+
+        // If you need to include website details (not just ID):
+        $finalData = $structuredData->mapWithKeys(function ($companies, $websiteId) {
+            $website = ParkingWebsite::find($websiteId); // Get website model
+            return [
+                $website->name => $companies, // Use website name as key
+            ];
+        });
+        $jsonData = json_decode($finalData, true);
+        // echo '<pre>'; print_r($jsonData); echo '</pre>'; exit;
+        return Excel::download(new AirportParkingExport($jsonData), 'exports_prices.xlsx');
+
+        // return Excel::download(new AirportParkingExport($distinctCompaniesNames, $parkingPrices), 'exports_prices.xlsx');
+
+        // return response()->json(['message' => 'Excel download functionality not implemented yet.']);
+    }
+}
