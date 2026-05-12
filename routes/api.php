@@ -55,3 +55,7 @@ Route::post('validate-license', function (Request $request) {
             : 'License expired. Please renew.'
     ]);
 });
+
+Route::middleware([\App\Http\Middleware\CheckSubscription::class])->group(function () {
+    Route::post('fetch-flights', [\App\Http\Controllers\Api\FlightApiController::class, 'fetchFlights']);
+});

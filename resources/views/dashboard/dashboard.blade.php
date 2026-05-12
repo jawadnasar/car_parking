@@ -40,6 +40,125 @@
                 </button>
             </div>
         </div>
+
+        <!-- API Analytics Section -->
+        <h2 style="margin:24px 0 16px;">API Analytics</h2>
+
+        <!-- Row 1: Incoming requests -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;">
+
+            <div class="stat-card" style="border-left:4px solid #3b82f6; background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="stat-label" style="color: #706f6c; font-size: 0.875rem; margin-bottom: 0.5rem;">Client Requests Today</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: 600;">{{ $stats['incoming_today'] }}</div>
+                <div class="stat-sub" style="font-size: 0.875rem; color: #706f6c;">Total: {{ $stats['incoming_total'] }}</div>
+            </div>
+
+            <div class="stat-card" style="border-left:4px solid #10b981; background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="stat-label" style="color: #706f6c; font-size: 0.875rem; margin-bottom: 0.5rem;">Flights Served Today</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: 600;">{{ $stats['flights_served_today'] }}</div>
+                <div class="stat-sub" style="font-size: 0.875rem; color: #706f6c;">This week: {{ $stats['incoming_week'] }} requests</div>
+            </div>
+
+            <div class="stat-card" style="border-left:4px solid #8b5cf6; background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="stat-label" style="color: #706f6c; font-size: 0.875rem; margin-bottom: 0.5rem;">Active Clients</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: 600;">{{ $stats['active_clients'] }}</div>
+                <div class="stat-sub" style="font-size: 0.875rem; color: #706f6c;">
+                    ✓ {{ $stats['incoming_success'] }} success
+                    / ✗ {{ $stats['incoming_failed'] }} failed
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Outgoing to Gatwick -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+
+            <div class="stat-card" style="border-left:4px solid #f59e0b; background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="stat-label" style="color: #706f6c; font-size: 0.875rem; margin-bottom: 0.5rem;">Gatwick Scrapes Today</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: 600;">{{ $stats['outgoing_today'] }}</div>
+                <div class="stat-sub" style="font-size: 0.875rem; color: #706f6c;">Total: {{ $stats['outgoing_total'] }}</div>
+            </div>
+
+            <div class="stat-card" style="border-left:4px solid #06b6d4; background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="stat-label" style="color: #706f6c; font-size: 0.875rem; margin-bottom: 0.5rem;">Flights Scraped Today</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: 600;">{{ $stats['flights_scraped_today'] }}</div>
+                <div class="stat-sub" style="font-size: 0.875rem; color: #706f6c;">This week: {{ $stats['outgoing_week'] }} scrapes</div>
+            </div>
+
+            <div class="stat-card" style="border-left:4px solid #ef4444; background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="stat-label" style="color: #706f6c; font-size: 0.875rem; margin-bottom: 0.5rem;">Gatwick Scrape Status</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: 600;" @style(['color: #ef4444' => $stats['outgoing_failed'] > 0, 'color: #10b981' => $stats['outgoing_failed'] == 0])>
+                    {{ $stats['outgoing_failed'] > 0 ? 'Issues' : 'Healthy' }}
+                </div>
+                <div class="stat-sub" style="font-size: 0.875rem; color: #706f6c;">
+                    ✓ {{ $stats['outgoing_success'] }} ok
+                    / ✗ {{ $stats['outgoing_failed'] }} failed
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent activity tables -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+            <!-- Incoming recent -->
+            <div style="background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <h3 style="font-size:14px;margin-bottom:10px;">Recent Client Requests</h3>
+                <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:6px;text-align:left;">Client</th>
+                            <th style="padding:6px;text-align:left;">Flights</th>
+                            <th style="padding:6px;text-align:left;">Found</th>
+                            <th style="padding:6px;text-align:left;">Time</th>
+                            <th style="padding:6px;text-align:left;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($stats['recent_incoming'] as $log)
+                        <tr style="border-bottom:1px solid #e5e7eb;">
+                            <td style="padding:6px;">{{ $log->client_name }}</td>
+                            <td style="padding:6px;">{{ $log->flights_requested }}</td>
+                            <td style="padding:6px;">{{ $log->flights_found }}</td>
+                            <td style="padding:6px;">{{ $log->response_time_ms }}ms</td>
+                            <td style="padding:6px;">
+                                <span @style(['color: #10b981' => $log->status === 'success', 'color: #ef4444' => $log->status !== 'success'])>
+                                    {{ $log->status }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Outgoing recent -->
+            <div style="background: white; padding: 1.5rem; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <h3 style="font-size:14px;margin-bottom:10px;">Recent Gatwick Scrapes</h3>
+                <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:6px;text-align:left;">Flights Found</th>
+                            <th style="padding:6px;text-align:left;">Duration</th>
+                            <th style="padding:6px;text-align:left;">Time</th>
+                            <th style="padding:6px;text-align:left;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($stats['recent_outgoing'] as $log)
+                        <tr style="border-bottom:1px solid #e5e7eb;">
+                            <td style="padding:6px;">{{ $log->flights_found }}</td>
+                            <td style="padding:6px;">{{ $log->response_time_ms }}ms</td>
+                            <td style="padding:6px;">{{ \Carbon\Carbon::parse($log->created_at)->format('H:i') }}</td>
+                            <td style="padding:6px;">
+                                <span @style(['color: #10b981' => $log->status === 'success', 'color: #ef4444' => $log->status !== 'success'])>
+                                    {{ $log->status }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <style>
