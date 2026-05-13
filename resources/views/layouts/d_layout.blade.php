@@ -254,6 +254,19 @@
                 </a>
             </li>
             <li>
+<<<<<<< HEAD
+=======
+                <a href="{{ route('clients.index') }}" class="@if(request()->routeIs('clients.*') || request()->is('admin/clients*')) active @endif">
+                    🔑 Clients
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('licenses.index') }}" class="@if(request()->routeIs('licenses.*') || request()->is('admin/licenses*')) active @endif">
+                    🔐 Offline Generator
+                </a>
+            </li>
+            <li>
+>>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e
                 <a href="#" class="@if(request()->routeIs('profile')) active @endif">
                     👤 Profile
                 </a>

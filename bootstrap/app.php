@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+<<<<<<< HEAD
+=======
+        $middleware->alias([
+            'subscription' => \App\Http\Middleware\CheckSubscription::class,
+        ]);
+>>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e
         //
         // $middleware->validateCsrfTokens(except: [
         //     'stripe/*',
