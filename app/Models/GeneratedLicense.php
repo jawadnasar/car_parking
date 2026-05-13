@@ -11,5 +11,16 @@ class GeneratedLicense extends Model
         'expiry_date',
         'license_key',
         'days',
+        'status',
     ];
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
 }
