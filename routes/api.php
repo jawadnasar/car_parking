@@ -13,9 +13,6 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 
 // Compare all websites prices
-<<<<<<< HEAD
-Route::apiResource('update_websites_prices', CompareAllWebsitesPricesController::class);
-=======
 Route::apiResource('update_websites_prices', CompareAllWebsitesPricesController::class);
 
 Route::post('check-subscription', function (Request $request) {
@@ -62,4 +59,3 @@ Route::post('validate-license', function (Request $request) {
 Route::middleware([\App\Http\Middleware\CheckSubscription::class])->group(function () {
     Route::post('fetch-flights', [\App\Http\Controllers\Api\FlightApiController::class, 'fetchFlights']);
 });
->>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e

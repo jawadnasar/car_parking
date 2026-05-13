@@ -19,21 +19,15 @@ Route::middleware(['auth'])->group(function () {
     
     // Flight checking routes
     Route::get('/check-flights', [App\Http\Controllers\CheckFlightsTimeController::class, 'show'])->name('check_flights');
-<<<<<<< HEAD
-    Route::post('/check-flights', [App\Http\Controllers\CheckFlightsTimeController::class, 'checkFlights'])->name('check_flights.submit');
-=======
     Route::post('/check-flights', [App\Http\Controllers\CheckFlightsTimeController::class, 'checkFlights'])
          ->name('check_flights.submit')
          ->middleware('subscription');
->>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e
 });
 
 Route::get('all_airport_parking_prices', [App\Http\Controllers\AllAirportParkingPrices::class, 'index'])->name('all_airport_parking_prices');
 Route::post('all_airport_parking_prices/search_by_dates', [App\Http\Controllers\AllAirportParkingPrices::class, 'search_by_dates'])->name('all_airport_parking_prices.search_by_dates');
 Route::post('all_airport_parking_prices/download_excel', [App\Http\Controllers\AllAirportParkingPrices::class, 'download_excel'])->name('all_airport_parking_prices.download_excel');
 
-<<<<<<< HEAD
-=======
 Route::prefix('admin/clients')->middleware('auth')->group(function () {
     Route::get('/',        [\App\Http\Controllers\ClientController::class, 'index'])->name('clients.index');
     Route::post('/',       [\App\Http\Controllers\ClientController::class, 'store'])->name('clients.store');
@@ -46,4 +40,3 @@ Route::prefix('admin/clients')->middleware('auth')->group(function () {
     Route::post('licenses/generate',[\App\Http\Controllers\LicenseController::class, 'generate'])->name('licenses.generate');
     Route::post('licenses/verify',  [\App\Http\Controllers\LicenseController::class, 'verify'])->name('licenses.verify');
 });
->>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e

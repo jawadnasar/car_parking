@@ -12,11 +12,6 @@ class DashboardController extends Controller
      */
     public function dashboard()
     {
-<<<<<<< HEAD
-        return view('dashboard.dashboard', [
-            // 'user' => Auth::user(),
-        ]);
-=======
         // Existing stats
         $totalWebsites = \App\Models\ParkingWebsite::count();
         $totalAirports = \App\Models\Airport::count();
@@ -48,6 +43,5 @@ class DashboardController extends Controller
         ];
 
         return view('dashboard.dashboard', compact('totalWebsites', 'totalAirports', 'stats'));
->>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e
     }
 }

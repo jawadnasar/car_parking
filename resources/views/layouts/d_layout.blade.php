@@ -254,8 +254,6 @@
                 </a>
             </li>
             <li>
-<<<<<<< HEAD
-=======
                 <a href="{{ route('clients.index') }}" class="@if(request()->routeIs('clients.*') || request()->is('admin/clients*')) active @endif">
                     🔑 Clients
                 </a>
@@ -266,7 +264,6 @@
                 </a>
             </li>
             <li>
->>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e
                 <a href="#" class="@if(request()->routeIs('profile')) active @endif">
                     👤 Profile
                 </a>

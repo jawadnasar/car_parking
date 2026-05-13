@@ -40,8 +40,6 @@
                 </button>
             </div>
         </div>
-<<<<<<< HEAD
-=======
 
         <!-- API Analytics Section -->
         <h2 style="margin:24px 0 16px;">API Analytics</h2>
@@ -161,7 +159,6 @@
                 </table>
             </div>
         </div>
->>>>>>> 859410876d405b3bca05890f854eef0ee84a2e2e
     </div>
 
     <style>
