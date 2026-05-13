@@ -274,7 +274,7 @@
             <div class="day-presets">
                 @foreach([7, 15, 30, 45, 90, 180, 365] as $d)
                     <button type="button" class="day-btn" data-days="{{ $d }}"
-                            onclick="selectDays({{ $d }}, this)">
+                            onclick="selectDays(this)">
                         {{ $d == 365 ? '1 Year' : $d . 'd' }}
                     </button>
                 @endforeach
@@ -415,7 +415,9 @@
 
 <script>
     // ── Day preset selection ──────────────────────────────────
-    function selectDays(days, btn) {
+    function selectDays(btn) {
+        const days = parseInt(btn.dataset.days, 10);
+
         // Deselect all
         document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
