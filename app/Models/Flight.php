@@ -12,5 +12,6 @@ class Flight extends Model
         'destination',
         'time',
         'terminal',
+        'status',
     ];
 }
