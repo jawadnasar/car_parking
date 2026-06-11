@@ -35,7 +35,6 @@ class CheckFlightsTimeController extends Controller
 
         // Get the airport
         $airport = Airport::find($request->airport_id);
-
         // Import flight numbers from Excel
         $flightNumbers = $this->importFlightNumbers($request->file('flights_file'));
         if (empty($flightNumbers)) {
