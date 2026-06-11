@@ -57,5 +57,5 @@ Route::post('validate-license', function (Request $request) {
 });
 
 Route::middleware([\App\Http\Middleware\CheckSubscription::class])->group(function () {
-    Route::post('fetch-flights', [\App\Http\Controllers\Api\FlightApiController::class, 'fetchFlights']);
+    Route::post('fetch-flights', [\App\Http\Controllers\API\FlightApiController::class, 'fetchFlights']);
 });
