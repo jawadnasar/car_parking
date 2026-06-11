@@ -34,14 +34,10 @@ class CheckSubscription {
         // Second: check GeneratedLicense table (Offline License Generator keys)
         $genLicense = GeneratedLicense::where('license_key', $apiKey)->first();
 
-        if ($genLicense && $genLicense->status === 'active' && $genLicense->expiry_date >= now()->toDateString()) {
-            // Create a lightweight client-like object for logging
-            $request->merge(['client' => (object)[
-                'name'   => $genLicense->client_name,
-                'api_key' => $apiKey,
-            ]]);
-            return $next($request);
-        }
+       if ($genLicense && $genLicense->status === 'active' && $genLicense->expiry_date >= now()->toDateString()) {
+    $request->merge(['client_name' => $genLicense->client_name]);
+    return $next($request);
+}
 
         return response()->json([
             'error'   => 'Subscription expired or invalid',
